@@ -34,7 +34,8 @@ typedef enum coap_uri_scheme_t {
   COAP_URI_SCHEME_HTTPS,     /* 5 Proxy-Uri only */
   COAP_URI_SCHEME_COAP_WS,   /* 6 */
   COAP_URI_SCHEME_COAPS_WS,  /* 7 */
-  COAP_URI_SCHEME_LAST       /* 8 Size of scheme */
+  COAP_URI_SCHEME_COAP_QUIC, /* 8 */
+  COAP_URI_SCHEME_LAST       /* 9 Size of scheme */
 } coap_uri_scheme_t;
 
 /** This mask can be used to check if a parsed URI scheme is secure. */
@@ -48,13 +49,15 @@ typedef enum coap_uri_scheme_t {
 #define COAP_URI_SCHEME_HTTPS_BIT      (1 << COAP_URI_SCHEME_HTTPS)
 #define COAP_URI_SCHEME_COAP_WS_BIT    (1 << COAP_URI_SCHEME_COAP_WS)
 #define COAP_URI_SCHEME_COAPS_WS_BIT   (1 << COAP_URI_SCHEME_COAPS_WS)
+#define COAP_URI_SCHEME_COAP_QUIC_BIT  (1 << COAP_URI_SCHEME_COAP_QUIC)
 
 #define COAP_URI_SCHEME_ALL_COAP_BITS (COAP_URI_SCHEME_COAP_BIT | \
                                        COAP_URI_SCHEME_COAPS_BIT | \
                                        COAP_URI_SCHEME_COAP_TCP_BIT | \
                                        COAP_URI_SCHEME_COAPS_TCP_BIT | \
                                        COAP_URI_SCHEME_COAP_WS_BIT | \
-                                       COAP_URI_SCHEME_COAPS_WS_BIT)
+                                       COAP_URI_SCHEME_COAPS_WS_BIT | \
+                                       COAP_URI_SCHEME_COAP_QUIC_BIT)
 
 /**
  * Representation of parsed URI. Components may be filled from a string with
@@ -79,7 +82,8 @@ typedef struct {
 
 static inline int
 coap_uri_scheme_is_secure(const coap_uri_t *uri) {
-  return uri && ((uri->scheme & COAP_URI_SCHEME_SECURE_MASK) != 0);
+  return uri && (((uri->scheme & COAP_URI_SCHEME_SECURE_MASK) != 0) ||
+                 uri->scheme == COAP_URI_SCHEME_COAP_QUIC);
 }
 
 /**

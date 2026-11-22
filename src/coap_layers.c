@@ -121,4 +121,10 @@ coap_layer_func_t coap_layers_coap[COAP_PROTO_LAST][COAP_LAYER_LAST] = {
     { NULL, NULL, NULL, NULL }  /* TLS */
   }
 #endif /* COAP_DISABLE_TCP */
+  ,{
+    /* COAP_PROTO_QUIC: installed by the ngtcp2 transport implementation. */
+    { NULL, NULL, NULL, NULL }, /* SESSION */
+    { NULL, NULL, NULL, NULL }, /* WS */
+    { NULL, NULL, NULL, NULL }  /* TLS */
+  }
 };

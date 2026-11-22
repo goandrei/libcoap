@@ -46,6 +46,13 @@ int coap_async_is_supported(void);
 int coap_client_is_supported(void);
 
 /**
+ * Check whether CoAP over QUIC is available.
+ *
+ * @return @c 1 if support is available, or @c 0 otherwise.
+ */
+int coap_quic_is_supported(void);
+
+/**
  * Check whether DTLS is available.
  *
  * @return @c 1 if support for DTLS is available, or @c 0 otherwise.

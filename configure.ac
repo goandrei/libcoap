@@ -411,6 +411,12 @@ AC_ARG_ENABLE([dtls],
               [build_dtls="$enableval"],
               [build_dtls="yes"])
 
+AC_ARG_ENABLE([quic],
+              [AS_HELP_STRING([--enable-quic],
+                              [Enable experimental CoAP over QUIC support using ngtcp2 and wolfSSL [default=no]])],
+              [build_quic="$enableval"],
+              [build_quic="no"])
+
 AC_ARG_WITH([gnutls],
             [AS_HELP_STRING([--with-gnutls],
                             [Use GnuTLS for DTLS functions])],
@@ -996,6 +1002,30 @@ AC_ARG_ENABLE([tcp],
 
 AC_DEFINE(COAP_DISABLE_TCP, [0], [Define to 1 to build without TCP support.])
 AS_IF([test "x$build_tcp" != "xyes"], [AC_DEFINE(COAP_DISABLE_TCP, [1])])
+
+if test "x$build_quic" = "xyes"; then
+    if test "x$build_tcp" != "xyes"; then
+        AC_MSG_ERROR([==> QUIC support requires TCP/RFC 8323 framing support.])
+    fi
+    PKG_CHECK_MODULES([NGTCP2], [libngtcp2 libngtcp2_crypto_wolfssl wolfssl],,
+                      [AC_MSG_ERROR([==> QUIC support requires libngtcp2, libngtcp2_crypto_wolfssl, and wolfSSL development packages.])])
+    save_CFLAGS="$CFLAGS"
+    save_LIBS="$LIBS"
+    CFLAGS="$NGTCP2_CFLAGS $CFLAGS"
+    LIBS="$NGTCP2_LIBS $LIBS"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+#include <wolfssl/quic.h>]], [[WOLFSSL *ssl = 0; wolfSSL_is_quic(ssl);]])],
+                   [have_wolfssl_quic_api=yes], [have_wolfssl_quic_api=no])
+    CFLAGS="$save_CFLAGS"
+    LIBS="$save_LIBS"
+    if test "x$have_wolfssl_quic_api" != "xyes"; then
+        AC_MSG_ERROR([==> QUIC support requires wolfSSL built with its QUIC API.])
+    fi
+    AC_DEFINE(COAP_WITH_NGTCP2, [1], [Define to 1 if ngtcp2 QUIC support is enabled.])
+fi
+AC_SUBST(NGTCP2_CFLAGS)
+AC_SUBST(NGTCP2_LIBS)
 AC_SUBST(COAP_DISABLE_TCP)
 
 # configure options

@@ -72,6 +72,9 @@
 /* Define to 1 if the system has wolfSSL */
 #cmakedefine COAP_WITH_LIBWOLFSSL @COAP_WITH_LIBWOLFSSL@
 
+/* Define to 1 if the system has ngtcp2 with the wolfSSL crypto helper. */
+#cmakedefine COAP_WITH_NGTCP2 @COAP_WITH_NGTCP2@
+
 /* Define to 1 if the library is to have observe persistence. */
 #cmakedefine COAP_WITH_OBSERVE_PERSIST @COAP_WITH_OBSERVE_PERSIST@
 

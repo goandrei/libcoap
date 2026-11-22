@@ -17,6 +17,12 @@
 
 #include "coap3/coap_libcoap_build.h"
 
+/* Replaced by the ngtcp2 implementation when QUIC support is built. */
+int
+coap_quic_is_supported(void) {
+  return 0;
+}
+
 #if !defined(COAP_WITH_LIBOPENSSL)
 int
 coap_tls_engine_configure(coap_str_const_t *conf_mem) {

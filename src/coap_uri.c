@@ -56,7 +56,8 @@ coap_uri_info_t coap_uri_scheme[COAP_URI_SCHEME_LAST] = {
   { "http",         80,               1, COAP_URI_SCHEME_HTTP },
   { "https",       443,               1, COAP_URI_SCHEME_HTTPS },
   { "coap+ws",      80,               0, COAP_URI_SCHEME_COAP_WS },
-  { "coaps+ws",    443,               0, COAP_URI_SCHEME_COAPS_WS }
+  { "coaps+ws",    443,               0, COAP_URI_SCHEME_COAPS_WS },
+  { "coap+quic",   COAPS_DEFAULT_PORT, 0, COAP_URI_SCHEME_COAP_QUIC }
 };
 
 static int
@@ -146,6 +147,12 @@ coap_split_uri_sub(const uint8_t *str_var,
   case COAP_URI_SCHEME_COAPS_WS:
     if (!coap_wss_is_supported()) {
       coap_log_err("coaps+ws URI scheme not supported in this version of libcoap\n");
+      return -1;
+    }
+    break;
+  case COAP_URI_SCHEME_COAP_QUIC:
+    if (!coap_quic_is_supported()) {
+      coap_log_err("coap+quic URI scheme not supported in this version of libcoap\n");
       return -1;
     }
     break;

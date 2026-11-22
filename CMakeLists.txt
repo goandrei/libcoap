@@ -93,6 +93,10 @@ option(
   ENABLE_DTLS
   "enable building with DTLS support"
   ON)
+option(
+  ENABLE_QUIC
+  "enable experimental CoAP over QUIC support using ngtcp2 and wolfSSL"
+  OFF)
 set(DTLS_BACKEND
     "default"
     CACHE
@@ -639,6 +643,31 @@ if(WITH_WOLFSSL)
   endif()
 endif()
 
+set(COAP_WITH_NGTCP2 0)
+if(ENABLE_QUIC)
+  if(NOT ENABLE_TCP)
+    message(FATAL_ERROR "ENABLE_QUIC requires ENABLE_TCP for RFC 8323 framing")
+  endif()
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(NGTCP2 REQUIRED IMPORTED_TARGET libngtcp2)
+  pkg_check_modules(NGTCP2_CRYPTO_WOLFSSL REQUIRED IMPORTED_TARGET libngtcp2_crypto_wolfssl)
+  pkg_check_modules(WOLFSSL_QUIC REQUIRED IMPORTED_TARGET wolfssl)
+  include(CheckCSourceCompiles)
+  set(CMAKE_REQUIRED_INCLUDES ${WOLFSSL_QUIC_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${WOLFSSL_QUIC_LIBRARIES})
+  check_c_source_compiles("#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+#include <wolfssl/quic.h>
+int main(void) { WOLFSSL *ssl = 0; return wolfSSL_is_quic(ssl); }"
+    COAP_WOLFSSL_HAS_QUIC_API)
+  unset(CMAKE_REQUIRED_INCLUDES)
+  unset(CMAKE_REQUIRED_LIBRARIES)
+  if(NOT COAP_WOLFSSL_HAS_QUIC_API)
+    message(FATAL_ERROR "ENABLE_QUIC requires wolfSSL built with its QUIC API")
+  endif()
+  set(COAP_WITH_NGTCP2 1)
+endif()
+
 execute_process(COMMAND git describe --tags --dirty --always
                 RESULT_VARIABLE USING_GIT
                 OUTPUT_VARIABLE LIBCOAP_PACKAGE_BUILD
@@ -670,6 +699,7 @@ message(STATUS "PACKAGE SOURCE...................${LIBCOAP_PACKAGE_BUILD}")
 message(STATUS "LIBRARY API VERSION..............${LIBCOAP_API_VERSION}")
 message(STATUS "LIBRARY ABI VERSION..............${LIBCOAP_ABI_VERSION}")
 message(STATUS "ENABLE_DTLS:.....................${ENABLE_DTLS}")
+message(STATUS "ENABLE_QUIC:.....................${ENABLE_QUIC}")
 message(STATUS "ENABLE_TCP:......................${ENABLE_TCP}")
 message(STATUS "ENABLE_IPV4:.....................${ENABLE_IPV4}")
 message(STATUS "ENABLE_IPV6:.....................${ENABLE_IPV6}")
@@ -823,6 +853,12 @@ target_link_libraries(
          $<$<BOOL:${COAP_WITH_LIBMBEDTLS}>:${MBEDCRYPTO_LIBRARY}>
          $<$<BOOL:${COAP_WITH_LIBWOLFSSL}>:${WOLFSSL_LIBRARY}>
          $<$<BOOL:${MINGW}>:ws2_32>)
+if(ENABLE_QUIC)
+  target_link_libraries(${COAP_LIBRARY_NAME} PUBLIC
+                        PkgConfig::NGTCP2
+                        PkgConfig::NGTCP2_CRYPTO_WOLFSSL
+                        PkgConfig::WOLFSSL_QUIC)
+endif()
 
 target_compile_options(
   ${COAP_LIBRARY_NAME}

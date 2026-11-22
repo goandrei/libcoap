@@ -975,7 +975,8 @@ coap_pdu_parse_header_size(coap_proto_t proto,
   assert(data);
   size_t header_size = 0;
 
-  if (proto == COAP_PROTO_TCP || proto==COAP_PROTO_TLS) {
+  if (proto == COAP_PROTO_TCP || proto==COAP_PROTO_TLS ||
+      proto == COAP_PROTO_QUIC) {
     uint8_t len = *data >> 4;
     if (len < 13)
       header_size = 2;
@@ -1006,13 +1007,15 @@ coap_pdu_parse_size(coap_proto_t proto,
                     size_t length) {
   assert(data);
   assert(proto == COAP_PROTO_TCP || proto == COAP_PROTO_TLS ||
+         proto == COAP_PROTO_QUIC ||
          proto == COAP_PROTO_WS || proto == COAP_PROTO_WSS);
   assert(coap_pdu_parse_header_size(proto, data) <= length);
 
   size_t size = 0;
   const uint8_t *token_start = NULL;
 
-  if ((proto == COAP_PROTO_TCP || proto == COAP_PROTO_TLS) && length >= 1) {
+  if ((proto == COAP_PROTO_TCP || proto == COAP_PROTO_TLS ||
+       proto == COAP_PROTO_QUIC) && length >= 1) {
     uint8_t len = *data >> 4;
     uint8_t tkl = *data & 0x0f;
 
@@ -1067,7 +1070,8 @@ coap_pdu_parse_header(coap_pdu_t *pdu, coap_proto_t proto) {
     pdu->type = (hdr[0] >> 4) & 0x03;
     pdu->code = hdr[1];
     pdu->mid = (uint16_t)hdr[2] << 8 | hdr[3];
-  } else if (proto == COAP_PROTO_TCP || proto == COAP_PROTO_TLS) {
+  } else if (proto == COAP_PROTO_TCP || proto == COAP_PROTO_TLS ||
+             proto == COAP_PROTO_QUIC) {
     assert(pdu->hdr_size >= 2 && pdu->hdr_size <= 6);
     pdu->type = COAP_MESSAGE_CON;
     pdu->code = hdr[pdu->hdr_size-1];

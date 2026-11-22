@@ -36,7 +36,8 @@ typedef struct coap_fixed_point_t {
 
 #define COAP_PROTO_NOT_RELIABLE(p) ((p)==COAP_PROTO_UDP || (p)==COAP_PROTO_DTLS)
 #define COAP_PROTO_RELIABLE(p) ((p)==COAP_PROTO_TCP || (p)==COAP_PROTO_TLS || \
-                                (p)==COAP_PROTO_WS || (p)==COAP_PROTO_WSS)
+                                (p)==COAP_PROTO_WS || (p)==COAP_PROTO_WSS || \
+                                (p)==COAP_PROTO_QUIC)
 
 /**
  * coap_session_type_t values

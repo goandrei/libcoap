@@ -163,7 +163,7 @@ EXTRA_DIST += $(libcoap_OSCORE_sources)
 endif # !COAP_OSCORE_SUPPORT
 
 AM_CFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include $(WARNING_CFLAGS) \
-            $(DTLS_CFLAGS) -std=c99 $(EXTRA_CFLAGS) \
+            $(DTLS_CFLAGS) $(NGTCP2_CFLAGS) -std=c99 $(EXTRA_CFLAGS) \
             -DLIBCOAP_PACKAGE_BUILD='"$(LIBCOAP_PACKAGE_BUILD)"'
 
 SUBDIRS = $(subdirs) . man doc tests examples
@@ -275,6 +275,7 @@ libcoap_@LIBCOAP_NAME_SUFFIX@_la_LDFLAGS =					\
   -version-info $(LT_LIBCOAP_CURRENT):$(LT_LIBCOAP_REVISION):$(LT_LIBCOAP_AGE)	\
   @libcoap_SYMBOLS@ \
   $(DTLS_LIBS) \
+  $(NGTCP2_LIBS) \
   -pie
 
 ## Collect symbols here we want to ignore while building the helper files

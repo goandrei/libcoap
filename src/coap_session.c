@@ -1293,6 +1293,13 @@ coap_session_create_client(coap_context_t *ctx,
     }
     default_port = 443;
     break;
+  case COAP_PROTO_QUIC:
+    if (!coap_quic_is_supported()) {
+      coap_log_crit("coap_new_client_session*: QUIC not supported\n");
+      return NULL;
+    }
+    default_port = COAPS_DEFAULT_PORT;
+    break;
   case COAP_PROTO_NONE:
   case COAP_PROTO_LAST:
   default:
@@ -2014,6 +2021,8 @@ coap_proto_name(coap_proto_t proto) {
     return "WS  ";
   case COAP_PROTO_WSS:
     return "WSS ";
+  case COAP_PROTO_QUIC:
+    return "QUIC";
   case COAP_PROTO_NONE:
   case COAP_PROTO_LAST:
   default:
@@ -2067,6 +2076,11 @@ coap_new_endpoint_lkd(coap_context_t *context, const coap_address_t *listen_addr
 
   if (proto == COAP_PROTO_WSS && !coap_wss_is_supported()) {
     coap_log_crit("coap_new_endpoint: WSS not supported\n");
+    goto error;
+  }
+
+  if (proto == COAP_PROTO_QUIC && !coap_quic_is_supported()) {
+    coap_log_crit("coap_new_endpoint: QUIC not supported\n");
     goto error;
   }
 

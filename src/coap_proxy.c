@@ -188,6 +188,12 @@ coap_verify_proxy_scheme_supported(coap_uri_scheme_t scheme) {
       return 0;
     }
     break;
+  case COAP_URI_SCHEME_COAP_QUIC:
+    if (!coap_quic_is_supported()) {
+      coap_log_warn("coap+quic URI scheme not supported for proxy\n");
+      return 0;
+    }
+    break;
   case COAP_URI_SCHEME_LAST:
   default:
     coap_log_warn("%d URI scheme not supported\n", scheme);

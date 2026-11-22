@@ -343,6 +343,11 @@ coap_get_available_scheme_hint_bits(int have_pki_psk, int ws_check,
         continue;
       scheme_hint_bits |= 1 << scheme;
       break;
+    case COAP_URI_SCHEME_COAP_QUIC:
+      if (!coap_quic_is_supported())
+        continue;
+      scheme_hint_bits |= 1 << scheme;
+      break;
     case COAP_URI_SCHEME_HTTP:
     case COAP_URI_SCHEME_HTTPS:
     case COAP_URI_SCHEME_LAST:
@@ -370,6 +375,9 @@ coap_get_available_scheme_hint_bits(int have_pki_psk, int ws_check,
     break;
   case COAP_PROTO_WSS:
     scheme_hint_bits = 1 << COAP_URI_SCHEME_COAPS_WS;
+    break;
+  case COAP_PROTO_QUIC:
+    scheme_hint_bits = 1 << COAP_URI_SCHEME_COAP_QUIC;
     break;
   case COAP_PROTO_NONE: /* If use_unix_proto was not defined */
   case COAP_PROTO_LAST:
@@ -423,6 +431,11 @@ get_coap_addr_info(coap_uri_scheme_t scheme) {
       return NULL;
     proto = COAP_PROTO_WSS;
     break;
+  case COAP_URI_SCHEME_COAP_QUIC:
+    if (!coap_quic_is_supported())
+      return NULL;
+    proto = COAP_PROTO_QUIC;
+    break;
   case COAP_URI_SCHEME_LAST:
   default:
     return NULL;
@@ -474,6 +487,10 @@ update_coap_addr_port(coap_uri_scheme_t scheme, coap_addr_info_t *info,
     break;
   case COAP_URI_SCHEME_COAPS_WS:
     update_port(&info->addr, ws_secure_port, 443,
+                type == COAP_RESOLVE_TYPE_LOCAL);
+    break;
+  case COAP_URI_SCHEME_COAP_QUIC:
+    update_port(&info->addr, secure_port, COAPS_DEFAULT_PORT,
                 type == COAP_RESOLVE_TYPE_LOCAL);
     break;
   case COAP_URI_SCHEME_LAST:
